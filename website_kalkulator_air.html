@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Air dan Menangkap Sampah</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            text-align: center;
+            overflow: hidden; /* Mencegah scrollbar */
+        }
+
+        h1 {
+            margin-top: 50px;
+        }
+
+        button {
+            margin: 20px;
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #004d40;
+        }
+
+        .content {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #gameArea {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border: 2px solid #00796b;
+            overflow: hidden; /* Mencegah elemen keluar dari area permainan */
+            margin: 20px auto;
+        }
+
+        .item {
+            font-size: 50px;
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.2s; /* Transisi untuk efek hover */
+        }
+
+        /* Gaya untuk gelembung */
+        .bubble {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: rise 1s forwards;
+            pointer-events: none; /* Agar gelembung tidak mengganggu klik */
+        }
+
+        @keyframes rise {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Selamat Datang di Kalkulator Air dan Menangkap Sampah</h1>
+    <button onclick="showContent('info')">Apa itu Air?</button>
+    <button onclick="showContent('calculator')">Kalkulator Air</button>
+    <button onclick="showContent('game')">Menangkap Sampah</button>
+
+    <div id="info" class="content">
+        <h2>Air Sumber Kehidupan dan Jantung Bumi</h2>
+        <p>Air adalah salah satu sumber daya alam yang paling berharga di Bumi. Hampir semua makhluk hidup membutuhkan air untuk bertahan hidup. Air juga berperan penting dalam berbagai proses alam, seperti siklus hidrologi, pengaturan suhu bumi, dan pembentukan lanskap.</p>
+        <h3>Pengaruh Air terhadap Lingkungan</h3>
+        <p>Berikut adalah contoh limbah yang dapat mencemari air:</p>
+        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px;">
+            <img src="img-1.png" alt="Contoh limbah 1" style="width: 200px; height: auto; border: 1px solid #ccc; border-radius: 5px;">
+            <img src="img-2.png" alt="Contoh limbah 2" style="width: 200px; height: auto; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <ul>
+            <li><strong>Siklus Hidrologi:</strong> Air terus bergerak dalam siklus yang melibatkan penguapan, kondensasi, presipitasi, dan aliran permukaan. Proses ini sangat penting untuk menjaga keseimbangan iklim dan ekosistem.</li>
+            <li><strong>Habitat bagi Makhluk Hidup:</strong> Air merupakan rumah bagi berbagai macam makhluk hidup, baik di darat maupun di air. Perubahan kualitas air dapat mengancam kelangsungan hidup mereka.</li>
+            <li><strong>Pengatur Suhu Bumi:</strong> Air memiliki kemampuan yang tinggi dalam menyerap dan menyimpan panas. Hal ini membantu menjaga suhu bumi agar tidak terlalu panas atau terlalu dingin.</li>
+            <li><strong>Pelarut Alami:</strong> Air dapat melarutkan berbagai macam zat, baik yang bermanfaat maupun yang berbahaya. Proses pelarutan ini sangat penting dalam pembentukan tanah dan batuan.</li>
+        </ul>
+        <h3><strong>Limbah industri, pertanian, dan domestik dapat mencemari air dan menyebabkan berbagai masalah lingkungan, seperti eutrofikasi, kematian massal biota air, dan penyebaran penyakit.
+            Penggunaan air yang berlebihan untuk keperluan industri dan pertanian dapat menyebabkan penurunan muka air tanah dan kekeringan.
+        </strong></h3>
+    </div>
+
+    <div id="calculator" class="content">
+        <h2>Kalkulator Pengeluaran Air</h2>
+        <p>Gunakan kalkulator ini untuk menghitung pengeluaran air berdasarkan jumlah liter yang digunakan. 
+        Formula perhitungan biaya: <strong>Biaya Total = Penggunaan Air (liter) × Harga per Liter</strong>. 
+        Harga per liter yang digunakan dalam kalkulasi ini adalah <strong>Rp 200</strong>.</p>
+        <p><strong>Contoh:</strong> Jika Anda menggunakan 500 liter air dalam sehari, maka biaya total adalah:</p>
+        <p><em>500 liter × Rp 200 = Rp 100,000</em></p>
+        <input type="number" id="usage" placeholder="Masukkan penggunaan air (liter)">
+        <button onclick="calculateWaterBill()">Hitung Biaya</button>
+        <p id="result"></p>
+    </div>
+
+    <div id="game" class="content">
+        <h2>Menangkap Sampah yang Bergerak</h2>
+        <div id="gameArea">
+            <div class="item" id="sampah" onclick="collect()">📄</div>
+        </div>
+        <div class="scoreboard">
+            <h2>Poin: <span id="score">0</span></h2>
+        </div>
+        <button onclick="resetGame()">Mulai Ulang</button>
+    </div>
+
+    <audio id="collectSound" src="sound/collect.mp3" preload="auto"></audio>
+
+    <script>
+        function showContent (contentId) {
+            const contents = document.querySelectorAll('.content');
+            contents.forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(contentId).style.display = 'block';
+        }
+
+        function calculateWaterBill() {
+            const usage = document.getElementById('usage').value;
+            const costPerLiter = 200; // Misalnya biaya per liter air
+            const totalCost = usage * costPerLiter;
+            document.getElementById('result').innerText = `Total biaya air: Rp ${totalCost}`;
+        }
+
+        let score = 0;
+
+        function collect() {
+            score += 1;
+            document.getElementById('score').innerText = score;
+            playSound();
+            createBubble(event.clientX, event.clientY);
+            moveTrash(); // Pindahkan sampah setelah dikumpulkan
+        }
+
+        function playSound() {
+            const sound = document.getElementById('collectSound');
+            sound.currentTime = 0; // Reset suara
+            sound.play();
+        }
+
+        function createBubble(x, y) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.style.left = `${x - 15}px`; // Offset untuk pusat gelembung
+            bubble.style.top = `${y - 15}px`; // Offset untuk pusat gelembung
+            document.body.appendChild(bubble);
+            setTimeout(() => {
+                bubble.remove(); // Hapus gelembung setelah animasi selesai
+            }, 1000);
+        }
+
+        function resetGame() {
+            score = 0;
+            document.getElementById('score').innerText = score;
+            alert("Game telah direset!");
+            moveTrash(); // Reset posisi sampah
+        }
+
+        function moveTrash() {
+            const trash = document.getElementById('sampah');
+            const gameArea = document.getElementById('gameArea');
+            const randomX = Math.random() * (gameArea.clientWidth - 50);
+            const randomY = Math.random() * (gameArea.clientHeight - 50);
+            trash.style.left = `${randomX}px`;
+            trash.style.top = `${randomY}px`;
+        }
+
+        // Menggerakkan sampah setiap 2 detik
+        setInterval(moveTrash, 2000);
+
+        // Inisialisasi posisi sampah saat halaman dimuat
+        window.onload = moveTrash;
+    </script>
+</body>
+</html>
